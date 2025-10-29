@@ -9,6 +9,15 @@ useradd --shell /sbin/nologin tomcat
 rsync -avzh /tmp/$TOMDIR/ /usr/local/tomcat/
 chown -R tomcat.tomcat /usr/local/tomcat
 
+# Create setenv.sh to fix Java 17 module access issues
+cat > /usr/local/tomcat/bin/setenv.sh << 'EOF'
+#!/bin/sh
+export CATALINA_OPTS="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED"
+EOF
+
+chmod +x /usr/local/tomcat/bin/setenv.sh
+chown tomcat:tomcat /usr/local/tomcat/bin/setenv.sh
+
 rm -rf /etc/systemd/system/tomcat.service
 
 cat <<EOT>> /etc/systemd/system/tomcat.service
@@ -32,7 +41,6 @@ Environment=CATALINE_BASE=/usr/local/tomcat
 
 ExecStart=/usr/local/tomcat/bin/catalina.sh run
 ExecStop=/usr/local/tomcat/bin/shutdown.sh
-
 
 RestartSec=10
 Restart=always

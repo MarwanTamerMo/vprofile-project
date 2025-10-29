@@ -43,6 +43,7 @@ Vagrant.configure("2") do |config|
    end
    end
    
+   
   
 ### Nginx VM ###
   config.vm.define "web01" do |web01|
